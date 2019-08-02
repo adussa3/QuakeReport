@@ -82,3 +82,7 @@ lint/tmp/
 # lint/reports/
 
 app/\.DS_Store
+
+\.DS_Store
+
+\.idea/
