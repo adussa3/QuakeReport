@@ -20,13 +20,13 @@ import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Intent;
 import android.content.Loader;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 
 import java.util.ArrayList;
@@ -46,7 +46,14 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderCallb
      */
     private static final int EARTHQUAKE_LOADER_ID = 1;
 
+    /** */
     private EarthquakeAdapter mEarthquakeAdapter;
+
+    /** TextView that is displayed when the list is empty */
+    private TextView mEmptyStateTextView;
+
+    /** */
+    private ProgressBar mLoadingIndicator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +62,15 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderCallb
 
         // Find a reference to the {@link ListView} in the layout
         ListView earthquakeListView = (ListView) findViewById(R.id.list);
+
+        /**********************************************************************************/
+
+        mEmptyStateTextView = (TextView) findViewById(R.id.empty_text_view);
+        earthquakeListView.setEmptyView(mEmptyStateTextView);
+
+        mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
+
+        /**********************************************************************************/
 
         // Create a new adapter that takes in an empty list of earthquakes as input
         mEarthquakeAdapter = new EarthquakeAdapter(this, new ArrayList<Earthquake>());
@@ -93,18 +109,28 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderCallb
 
     @Override
     public Loader<List<Earthquake>> onCreateLoader(int i, Bundle bundle) {
+        mLoadingIndicator.setVisibility(View.VISIBLE);
+        mEmptyStateTextView.setVisibility(View.GONE);
+
+        /**********************************************************************************/
+
         // Create a new loader for the given URL
         return new EarthquakeLoader(this, USGS_REQUEST_URL);
     }
 
     @Override
     public void onLoadFinished(Loader<List<Earthquake>> loader, List<Earthquake> earthquakes) {
+        mLoadingIndicator.setVisibility(View.GONE);
+        mEmptyStateTextView.setVisibility(View.VISIBLE);
+
+        /**********************************************************************************/
+
         // Clear the adapter of previous earthquake data
         mEarthquakeAdapter.clear();
 
         // If there is a valid list of {@link Earthquake}s, then add the to the adapter's
         // earthquakes (A.K.A. data set). This will trigger the ListView to update.
-        if (earthquakes == null || !earthquakes.isEmpty()) {
+        if (earthquakes != null && !earthquakes.isEmpty()) {
             mEarthquakeAdapter.addAll(earthquakes);
         }
     }
